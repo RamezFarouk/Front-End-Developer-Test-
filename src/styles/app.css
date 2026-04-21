@@ -1,0 +1,163 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eyebrow {
+  color: #6366f1;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.page__header h1 {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+}
+
+.dir-toggle {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.card__subtitle {
+  color: #64748b;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field__label {
+  font-weight: 600;
+}
+
+.field__input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: #fff;
+}
+
+.field__input--error {
+  border-color: #dc2626;
+}
+
+.field__error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.select-wrap {
+  position: relative;
+}
+
+.select-flag {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 0.7rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.btn-primary {
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-message {
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-row,
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.summary-total {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 1.1rem;
+}
+
+.state {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.state--error {
+  color: #b91c1c;
+}
+
+@media (min-width: 900px) {
+  .page {
+    padding: 1.5rem;
+  }
+
+  .layout-grid {
+    grid-template-columns: 1.35fr 1fr;
+    align-items: start;
+  }
+
+  .card {
+    padding: 1.4rem;
+  }
+}

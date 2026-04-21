@@ -1,0 +1,34 @@
+{
+  "pricing": [
+    {
+      "id": "1",
+      "months": 3,
+      "sessionsPerMonth": 8,
+      "pricePerSession": 18
+    },
+    {
+      "id": "2",
+      "months": 6,
+      "sessionsPerMonth": 10,
+      "pricePerSession": 16
+    },
+    {
+      "id": "3",
+      "months": 12,
+      "sessionsPerMonth": 12,
+      "pricePerSession": 14
+    }
+  ],
+  "orders": [
+    {
+      "fullName": "Ramez Amgad",
+      "email": "ramezafarouk@hotmail.com",
+      "phone": "+201200706039",
+      "country": "DE",
+      "planId": 3,
+      "totalPrice": 432,
+      "id": "QoY5LUhKNHo"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
