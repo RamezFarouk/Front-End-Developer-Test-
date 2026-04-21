@@ -1,11 +1,12 @@
-import { usePricing } from "../hooks/usePricing";
-
-function OrderSummary({ pricing, selectedPlanId }) {
-  const { selectedPlan, monthlyPrice, totalSessions, totalPrice } = usePricing(
-    pricing,
-    selectedPlanId
-  );
-
+function OrderSummary({
+  selectedPlan,
+  durationMonths,
+  sessionsPerMonth,
+  pricePerSession,
+  monthlyTotal,
+  totalSessions,
+  totalPrice,
+}) {
   if (!selectedPlan) {
     return (
       <aside className="card card--summary">
@@ -23,19 +24,19 @@ function OrderSummary({ pricing, selectedPlanId }) {
       <div className="summary-list">
         <div className="summary-row">
           <span>Duration</span>
-          <strong>{selectedPlan.months} months</strong>
+          <strong>{durationMonths} months</strong>
         </div>
         <div className="summary-row">
           <span>Sessions per month</span>
-          <strong>{selectedPlan.sessionsPerMonth}</strong>
+          <strong>{sessionsPerMonth}</strong>
         </div>
         <div className="summary-row">
           <span>Price per session</span>
-          <strong>${selectedPlan.pricePerSession}</strong>
+          <strong>${pricePerSession}</strong>
         </div>
         <div className="summary-row">
           <span>Monthly total</span>
-          <strong>${monthlyPrice}</strong>
+          <strong>${monthlyTotal}</strong>
         </div>
         <div className="summary-row">
           <span>Total sessions</span>

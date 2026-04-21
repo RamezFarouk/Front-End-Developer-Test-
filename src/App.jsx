@@ -11,6 +11,18 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState("");
 
+  const selectedPlan =
+    pricing.find((plan) => Number(plan.id) === Number(selectedPlanId)) ?? null;
+
+  const durationMonths =
+    selectedPlan?.durationMonths ?? selectedPlan?.months ?? 0;
+  const sessionsPerMonth = selectedPlan?.sessionsPerMonth ?? 0;
+  const pricePerSession = selectedPlan?.pricePerSession ?? 0;
+
+  const monthlyTotal = pricePerSession * sessionsPerMonth;
+  const totalPrice = monthlyTotal * durationMonths;
+  const totalSessions = sessionsPerMonth * durationMonths;
+
   useEffect(() => {
     document.documentElement.dir = direction;
   }, [direction]);
@@ -21,9 +33,15 @@ function App() {
         setLoading(true);
         setApiError("");
         const pricingData = await getPricing();
-        setPricing(pricingData);
-        if (pricingData.length) {
-          setSelectedPlanId(pricingData[0].id);
+        const normalizedPricing = pricingData.map((plan) => ({
+          ...plan,
+          id: Number(plan.id),
+          durationMonths: plan.durationMonths ?? plan.months,
+        }));
+
+        setPricing(normalizedPricing);
+        if (normalizedPricing.length) {
+          setSelectedPlanId(Number(normalizedPricing[0].id));
         }
       } catch (error) {
         setApiError("Could not load pricing plans. Please retry.");
@@ -65,8 +83,18 @@ function App() {
             pricing={pricing}
             selectedPlanId={selectedPlanId}
             onSelectPlan={setSelectedPlanId}
+            selectedPlan={selectedPlan}
+            totalPrice={totalPrice}
           />
-          <OrderSummary pricing={pricing} selectedPlanId={selectedPlanId} />
+          <OrderSummary
+            selectedPlan={selectedPlan}
+            durationMonths={durationMonths}
+            sessionsPerMonth={sessionsPerMonth}
+            pricePerSession={pricePerSession}
+            monthlyTotal={monthlyTotal}
+            totalSessions={totalSessions}
+            totalPrice={totalPrice}
+          />
         </main>
       )}
     </div>

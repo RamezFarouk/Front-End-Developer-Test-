@@ -1,17 +1,23 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import ReactCountryFlag from "react-country-flag";
 import InputField from "./InputField";
 import Button from "./Button";
 import { countries } from "../data/countries";
-import { usePricing } from "../hooks/usePricing";
 import { submitOrder } from "../services/api";
 
-function CheckoutForm({ pricing, selectedPlanId, onSelectPlan }) {
+function CheckoutForm({
+  pricing,
+  selectedPlanId,
+  onSelectPlan,
+  selectedPlan,
+  totalPrice,
+}) {
   const [submitState, setSubmitState] = useState({ loading: false, message: "" });
   const {
     register,
     handleSubmit,
+    setValue,
     watch,
     formState: { errors },
     reset,
@@ -25,10 +31,14 @@ function CheckoutForm({ pricing, selectedPlanId, onSelectPlan }) {
     },
   });
 
-  const activePlanId = watch("planId") || selectedPlanId;
-  const { selectedPlan, totalPrice } = usePricing(pricing, activePlanId);
-
   const countryList = useMemo(() => countries, []);
+  const selectedCountryCode = watch("country") || "US";
+
+  useEffect(() => {
+    if (selectedPlanId !== null && selectedPlanId !== undefined) {
+      setValue("planId", Number(selectedPlanId));
+    }
+  }, [selectedPlanId, setValue]);
 
   const onSubmit = async (formValues) => {
     try {
@@ -107,7 +117,10 @@ function CheckoutForm({ pricing, selectedPlanId, onSelectPlan }) {
           <label htmlFor="country" className="field__label">
             Country
           </label>
-          <div className="select-wrap">
+          <div className="country-select-wrap">
+            <span className="country-select-flag" aria-hidden="true">
+              <ReactCountryFlag countryCode={selectedCountryCode} svg />
+            </span>
             <select id="country" className="field__input" {...register("country", { required: true })}>
               {countryList.map((country) => (
                 <option key={country.code} value={country.code}>
@@ -115,9 +128,6 @@ function CheckoutForm({ pricing, selectedPlanId, onSelectPlan }) {
                 </option>
               ))}
             </select>
-            <span className="select-flag" aria-hidden="true">
-              <ReactCountryFlag countryCode={watch("country") || "US"} svg />
-            </span>
           </div>
         </div>
 
@@ -128,12 +138,17 @@ function CheckoutForm({ pricing, selectedPlanId, onSelectPlan }) {
           <select
             id="planId"
             className="field__input"
+            value={selectedPlanId ?? ""}
             {...register("planId", { required: "Please choose a plan" })}
-            onChange={(event) => onSelectPlan(Number(event.target.value))}
+            onChange={(event) => {
+              const planId = Number(event.target.value);
+              setValue("planId", planId, { shouldValidate: true });
+              onSelectPlan(planId);
+            }}
           >
             {pricing.map((plan) => (
               <option key={plan.id} value={plan.id}>
-                {plan.months} months - {plan.sessionsPerMonth} sessions/month
+                {(plan.durationMonths ?? plan.months)} months - {plan.sessionsPerMonth} sessions/month
               </option>
             ))}
           </select>
