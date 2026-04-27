@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import ReactCountryFlag from "react-country-flag";
 import CheckoutForm from "./components/CheckoutForm";
 import OrderSummary from "./components/OrderSummary";
+import LoadingSkeleton from "./components/LoadingSkeleton";
+import SuccessModal from "./components/SuccessModal";
 import { getPricing } from "./services/api";
 import "./styles/app.css";
 
 function App() {
+  const checkoutFormId = "checkout-form";
   const [pricing, setPricing] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [direction, setDirection] = useState("ltr");
@@ -13,6 +16,7 @@ function App() {
   const [apiError, setApiError] = useState("");
   const [payInAdvance, setPayInAdvance] = useState(false);
   const [selectedLocale, setSelectedLocale] = useState("en-GB");
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const selectedPlan =
     pricing.find((plan) => Number(plan.id) === Number(selectedPlanId)) ?? null;
@@ -38,32 +42,50 @@ function App() {
 
   const i18n = {
     "en-GB": {
-      eyebrow: "Order your learning plan",
-      title: "Build your personalized tutoring package",
+      eyebrow: "Step 2 of 3: Payment",
+      title: "Complete your order",
       switchDir: direction === "ltr" ? "Switch to RTL" : "Switch to LTR",
       loading: "Loading pricing plans...",
-      apiError: "Could not load pricing plans. Please retry.",
+      apiError: "Could not load pricing plans. Using default fallback plans.",
+      successTitle: "Order Successful!",
+      successMessage: "Thank you for your purchase. We will contact you shortly.",
+      close: "Close"
     },
     "fr-FR": {
-      eyebrow: "Commandez votre plan d'apprentissage",
-      title: "Créez votre forfait de tutorat personnalisé",
+      eyebrow: "Étape 2 sur 3 : Paiement",
+      title: "Finalisez votre commande",
       switchDir: direction === "ltr" ? "Passer en RTL" : "Passer en LTR",
       loading: "Chargement des offres...",
-      apiError: "Impossible de charger les offres. Veuillez réessayer.",
+      apiError: "Impossible de charger les offres. Utilisation des forfaits par défaut.",
+      successTitle: "Commande réussie !",
+      successMessage: "Merci pour votre achat. Nous vous contacterons sous peu.",
+      close: "Fermer"
     },
     "ar-SA": {
-      eyebrow: "اطلب خطة التعلم الخاصة بك",
-      title: "أنشئ باقة التدريس المخصصة لك",
+      eyebrow: "الخطوة 2 من 3: الدفع",
+      title: "أكمل طلبك",
       switchDir: direction === "ltr" ? "التحويل إلى RTL" : "التحويل إلى LTR",
       loading: "جار تحميل الباقات...",
-      apiError: "تعذر تحميل الباقات. يرجى المحاولة مرة أخرى.",
+      apiError: "تعذر تحميل الباقات. يتم استخدام الباقات الافتراضية.",
+      successTitle: "تم الطلب بنجاح!",
+      successMessage: "شكراً لشرائك. سنتواصل معك قريباً.",
+      close: "إغلاق"
     },
   };
   const t = i18n[selectedLocale] ?? i18n["en-GB"];
 
   useEffect(() => {
     document.documentElement.dir = direction;
-  }, [direction]);
+    // SEO Meta Tags
+    document.title = t.title + " | GoStudent";
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.name = "description";
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.content = t.eyebrow + " - " + t.title;
+  }, [direction, t.title, t.eyebrow]);
 
   useEffect(() => {
     document.documentElement.lang = selectedLocale;
@@ -88,55 +110,67 @@ function App() {
 
         setPricing(normalizedPricing);
         if (normalizedPricing.length) {
-          setSelectedPlanId(Number(normalizedPricing[0].id));
+          // Select middle plan (6 months) as default if available, otherwise first
+          const defaultPlan = normalizedPricing.find(p => p.durationMonths === 6) || normalizedPricing[0];
+          setSelectedPlanId(Number(defaultPlan.id));
         }
       } catch (error) {
-        setApiError("pricing-load-failed");
+        setApiError(t.apiError);
       } finally {
         setLoading(false);
       }
     };
 
     loadPricing();
-  }, []);
+  }, [t.apiError]);
 
   return (
     <div className="page" dir={direction}>
       <header className="page__header">
         <div>
-          <p className="eyebrow">{t.eyebrow}</p>
+          <div className="eyebrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            {t.eyebrow}
+          </div>
           <h1>{t.title}</h1>
         </div>
-        <button
-          type="button"
-          className="dir-toggle"
-          onClick={() =>
-            setDirection((currentDirection) =>
-              currentDirection === "ltr" ? "rtl" : "ltr"
-            )
-          }
-        >
-          {t.switchDir}
-        </button>
-        <div className="language-switcher" role="group" aria-label="Language selector">
-          {languageOptions.map((language) => (
-            <button
-              key={language.value}
-              type="button"
-              className={`language-pill ${selectedLocale === language.value ? "language-pill--active" : ""}`}
-              onClick={() => setSelectedLocale(language.value)}
-            >
-              <ReactCountryFlag countryCode={language.code} svg />
-              <span>{language.label}</span>
-            </button>
-          ))}
+        <div className="header-actions">
+          <button
+            type="button"
+            className="dir-toggle"
+            onClick={() =>
+              setDirection((currentDirection) =>
+                currentDirection === "ltr" ? "rtl" : "ltr"
+              )
+            }
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12H3"></path><path d="M21 12L17 8"></path><path d="M21 12L17 16"></path></svg>
+            {t.switchDir}
+          </button>
+          <div className="language-switcher" role="group" aria-label="Language selector">
+            {languageOptions.map((language) => (
+              <button
+                key={language.value}
+                type="button"
+                className={`language-pill ${selectedLocale === language.value ? "language-pill--active" : ""}`}
+                onClick={() => setSelectedLocale(language.value)}
+              >
+                <ReactCountryFlag countryCode={language.code} svg style={{ width: '1em', height: '1em' }} />
+                <span>{language.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
+      {apiError && (
+        <div className="state state--error" style={{ marginBottom: "1rem" }}>
+          ⚠ {apiError}
+        </div>
+      )}
+
       {loading ? (
-        <div className="state">{t.loading}</div>
-      ) : apiError ? (
-        <div className="state state--error">{t.apiError}</div>
+        <LoadingSkeleton />
       ) : (
         <main className="layout-grid">
           <CheckoutForm
@@ -148,6 +182,8 @@ function App() {
             onTogglePayInAdvance={setPayInAdvance}
             finalTotalPrice={finalTotalPrice}
             locale={selectedLocale}
+            onSuccess={() => setIsSuccessModalOpen(true)}
+            formId={checkoutFormId}
           />
           <OrderSummary
             selectedPlan={selectedPlan}
@@ -163,9 +199,16 @@ function App() {
             payInAdvance={payInAdvance}
             finalTotalPrice={finalTotalPrice}
             locale={selectedLocale}
+            checkoutFormId={checkoutFormId}
           />
         </main>
       )}
+
+      <SuccessModal 
+        isOpen={isSuccessModalOpen} 
+        onClose={() => setIsSuccessModalOpen(false)} 
+        t={t}
+      />
     </div>
   );
 }
